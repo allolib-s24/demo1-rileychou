@@ -1,4 +1,4 @@
-﻿#include <cstdio>  // for printing to stdout
+﻿#include <cstdio> // for printing to stdout
 
 #include "Gamma/Analysis.h"
 #include "Gamma/Effects.h"
@@ -12,8 +12,8 @@
 #include "al/ui/al_ControlGUI.hpp"
 #include "al/ui/al_Parameter.hpp"
 
-#include "al/graphics/al_Shapes.hpp"
 #include "al/graphics/al_Font.hpp"
+#include "al/graphics/al_Shapes.hpp"
 
 // using namespace gam;
 using namespace al;
@@ -23,7 +23,8 @@ using namespace al;
 // define the synth's voice parameters and the sound and graphic generation
 // processes in the onProcess() functions.
 
-// The helper function used to visualize which keys pressed or released on a virtual piano.
+// The helper function used to visualize which keys pressed or released on a
+// virtual piano.
 int asciiToKeyLabelIndex(int asciiKey) {
   switch (asciiKey) {
   case '2':
@@ -102,7 +103,7 @@ int asciiToKeyLabelIndex(int asciiKey) {
 }
 
 class SineEnv : public SynthVoice {
- public:
+public:
   // Unit generators
   gam::Pan<> mPan;
   gam::Sine<> mOsc;
@@ -116,9 +117,9 @@ class SineEnv : public SynthVoice {
   // it is created. Voices will be reused if they are idle.
   void init() override {
     // Intialize envelope
-    mAmpEnv.curve(0);  // make segments lines
+    mAmpEnv.curve(0); // make segments lines
     mAmpEnv.levels(0, 1, 1, 0);
-    mAmpEnv.sustainPoint(2);  // Make point 2 sustain until a release is issued
+    mAmpEnv.sustainPoint(2); // Make point 2 sustain until a release is issued
 
     addRect(mMesh, 1, 1, 0.5, 0.5);
     // This is a quick way to create parameters for the voice. Trigger
@@ -132,7 +133,7 @@ class SineEnv : public SynthVoice {
     createInternalTriggerParameter("attackTime", 1.0, 0.01, 3.0);
     createInternalTriggerParameter("releaseTime", 3.0, 0.1, 10.0);
     createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
-    
+
     createInternalTriggerParameter("pianoKeyX");
     createInternalTriggerParameter("pianoKeyY");
     createInternalTriggerParameter("pianoKeyWidth");
@@ -140,7 +141,7 @@ class SineEnv : public SynthVoice {
   }
 
   // The audio processing function
-  void onProcess(AudioIOData& io) override {
+  void onProcess(AudioIOData &io) override {
     // Get the values from the parameters and apply them to the corresponding
     // unit generators. You could place these lines in the onTrigger() function,
     // but placing them here allows for realtime prototyping on a running
@@ -162,11 +163,12 @@ class SineEnv : public SynthVoice {
     // We need to let the synth know that this voice is done
     // by calling the free(). This takes the voice out of the
     // rendering chain
-    if (mAmpEnv.done() && (mEnvFollow.value() < 0.001f)) free();
+    if (mAmpEnv.done() && (mEnvFollow.value() < 0.001f))
+      free();
   }
 
   // The graphics processing function
-  void onProcess(Graphics& g) override {
+  void onProcess(Graphics &g) override {
     // Get the paramter values on every video frame, to apply changes to the
     // current instance
     float frequency = getInternalParameterValue("frequency");
@@ -181,13 +183,13 @@ class SineEnv : public SynthVoice {
     float hue = (frequency - 200) / 1000;
     float sat = amplitude;
     float val = 0.9;
-    
+
     g.pushMatrix();
     g.translate(x, y);
     g.scale(w, h);
-    
+
     g.color(Color(HSV(hue, sat, val), mEnvFollow.value() * 30));
-    
+
     g.draw(mMesh);
     g.popMatrix();
   }
@@ -202,21 +204,23 @@ class SineEnv : public SynthVoice {
 
 // We make an app.
 class MyApp : public App {
- public:
+public:
   // GUI manager for SineEnv voices
   // The name provided determines the name of the directory
   // where the presets and sequences are stored
   SynthGUIManager<SineEnv> synthManager{"SineEnv_Piano"};
-  
+
   // Mesh and variables for drawing piano keys
   Mesh meshKey;
   float keyWidth, keyHeight;
   float keyPadding = 2.f;
   float fontSize;
-  std::string whitekeyLabels[20] = {"Z","X","C","V","B","N","M",",",".","/",
-                                    "Q","W","E","R","T","Y","U","I","O","P"};
-  std::string blackkeyLabels[20] = {"S","D","","G","H","J","","L",";","",
-                                    "2","3","","5","6","7","","9","0",""};
+  std::string whitekeyLabels[20] = {"Z", "X", "C", "V", "B", "N", "M",
+                                    ",", ".", "/", "Q", "W", "E", "R",
+                                    "T", "Y", "U", "I", "O", "P"};
+  std::string blackkeyLabels[20] = {"S", "D", "", "G", "H", "J", "",
+                                    "L", ";", "", "2", "3", "",  "5",
+                                    "6", "7", "", "9", "0", ""};
   // Font renderder
   FontRenderer fontRender;
 
@@ -225,8 +229,8 @@ class MyApp : public App {
   // It's also a good place to put things that should
   // happen once at startup.
   void onCreate() override {
-    navControl().active(false);  // Disable navigation via keyboard, since we
-                                 // will be using keyboard for note triggering
+    navControl().active(false); // Disable navigation via keyboard, since we
+                                // will be using keyboard for note triggering
 
     // Set sampling rate for Gamma objects from app's audio
     gam::sampleRate(audioIO().framesPerSecond());
@@ -252,8 +256,8 @@ class MyApp : public App {
   }
 
   // The audio callback function. Called when audio hardware requires data
-  void onSound(AudioIOData& io) override {
-    synthManager.render(io);  // Render audio
+  void onSound(AudioIOData &io) override {
+    synthManager.render(io); // Render audio
   }
 
   void onAnimate(double dt) override {
@@ -265,22 +269,22 @@ class MyApp : public App {
   }
 
   // The graphics callback function.
-  void onDraw(Graphics& g) override {
+  void onDraw(Graphics &g) override {
     g.clear();
 
     // This example uses only the orthogonal projection for 2D drawing
-    g.camera(Viewpoint::ORTHO_FOR_2D);  // Ortho [0:width] x [0:height]
+    g.camera(Viewpoint::ORTHO_FOR_2D); // Ortho [0:width] x [0:height]
 
     // Drawing white piano keys
-    for(int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
       int index = i % 10;
       g.pushMatrix();
-      
+
       float c = 0.9;
       float x = (keyWidth + keyPadding * 2) * index + keyPadding;
       float y = 10;
 
-      if(i >= 10) {
+      if (i >= 10) {
         y = keyHeight + keyPadding * 2;
       }
 
@@ -288,7 +292,7 @@ class MyApp : public App {
       g.color(c);
       g.tint(c);
       g.draw(meshKey);
-      
+
       g.tint(1);
       fontRender.write(whitekeyLabels[i].c_str(), fontSize);
       fontRender.renderAt(g, {keyWidth * 0.5 - 5, keyHeight * 0.1, 0.0});
@@ -297,17 +301,19 @@ class MyApp : public App {
     }
 
     // Drawing balck piano keys
-    for(int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) {
       int index = i % 10;
-      if(index == 2 || index == 6 || index == 9) continue;
+      if (index == 2 || index == 6 || index == 9)
+        continue;
 
       g.pushMatrix();
-      
-      float c = 0.5;      
-      float x = (keyWidth + keyPadding * 2) * index + keyPadding + keyWidth * 0.5;
+
+      float c = 0.5;
+      float x =
+          (keyWidth + keyPadding * 2) * index + keyPadding + keyWidth * 0.5;
       float y = keyHeight * 0.5;
 
-      if(i >= 10) {
+      if (i >= 10) {
         y = y + keyHeight + keyPadding * 2;
       }
 
@@ -316,13 +322,13 @@ class MyApp : public App {
       g.color(c);
       g.tint(c);
       g.draw(meshKey);
-      
+
       g.scale(1, 2);
-      
+
       g.tint(1);
       fontRender.write(blackkeyLabels[i].c_str(), fontSize);
       fontRender.renderAt(g, {keyWidth * 0.5 - 5, keyHeight * 0.1, 0.0});
-      
+
       g.popMatrix();
     }
 
@@ -334,9 +340,9 @@ class MyApp : public App {
   }
 
   // Whenever a key is pressed, this function is called
-  bool onKeyDown(Keyboard const& k) override {
-    if (ParameterGUI::usingKeyboard()) {  // Ignore keys if GUI is using
-                                          // keyboard
+  bool onKeyDown(Keyboard const &k) override {
+    if (ParameterGUI::usingKeyboard()) { // Ignore keys if GUI is using
+                                         // keyboard
       return true;
     }
     if (k.shift()) {
@@ -346,13 +352,13 @@ class MyApp : public App {
     } else {
       // Otherwise trigger note for polyphonic synth
       int midiNote = asciiToMIDI(k.key());
-      
+
       if (midiNote > 0) {
         // Check which key is pressed
         int keyIndex = asciiToKeyLabelIndex(k.key());
-        
+
         bool isBlackKey = false;
-        if(keyIndex >= 20) {
+        if (keyIndex >= 20) {
           keyIndex -= 20;
           isBlackKey = true;
         }
@@ -364,22 +370,22 @@ class MyApp : public App {
         float h = keyHeight;
         float x = (keyWidth + keyPadding * 2) * (keyIndex % 10) + keyPadding;
         float y = 0;
-        
-        if(isBlackKey == true) {
+
+        if (isBlackKey == true) {
           x += keyWidth * 0.5;
           y += keyHeight * 0.5;
           h *= 0.5;
         }
-        
-        if(keyIndex >= 10) {
+
+        if (keyIndex >= 10) {
           y += keyHeight + keyPadding * 2;
         }
-        
+
         synthManager.voice()->setInternalParameterValue("pianoKeyWidth", w);
         synthManager.voice()->setInternalParameterValue("pianoKeyHeight", h);
         synthManager.voice()->setInternalParameterValue("pianoKeyX", x);
         synthManager.voice()->setInternalParameterValue("pianoKeyY", y);
-        
+
         synthManager.triggerOn(midiNote);
       }
     }
@@ -387,14 +393,14 @@ class MyApp : public App {
   }
 
   // Whenever a key is released this function is called
-  bool onKeyUp(Keyboard const& k) override {
+  bool onKeyUp(Keyboard const &k) override {
     int midiNote = asciiToMIDI(k.key());
     if (midiNote > 0) {
       synthManager.triggerOff(midiNote);
     }
     return true;
   }
-  
+
   // Whenever the window size changes this function is called
   void onResize(int w, int h) override {
     // Recaculate the size of piano keys based new window size
@@ -410,10 +416,10 @@ class MyApp : public App {
 int main() {
   // Create app instance
   MyApp app;
-  
+
   // Set window size
   app.dimensions(1200, 600);
-  
+
   // Set up audio
   app.configureAudio(48000., 512, 2, 0);
   app.start();

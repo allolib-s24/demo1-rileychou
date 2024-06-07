@@ -26,6 +26,7 @@ public:
   gam::Pan<> mPan;
   gam::Sine<> mOsc;
   gam::Env<3> mAmpEnv;
+  gam::Sine<> mVib;
   // envelope follower to connect audio output to graphics
   gam::EnvFollow<> mEnvFollow;
 
@@ -54,6 +55,10 @@ public:
     createInternalTriggerParameter("attackTime", 1.0, 0.01, 3.0);
     createInternalTriggerParameter("releaseTime", 3.0, 0.1, 10.0);
     createInternalTriggerParameter("pan", 0.0, -1.0, 1.0);
+
+    // make vib depth (0-1), vib freq (0-20)
+    createInternalTriggerParameter("vibDepth", 1.0, 0.0, 1.0);
+    createInternalTriggerParameter("vibFreq", 10.0, 0.0, 20);
   }
 
   // The audio processing function
@@ -64,7 +69,19 @@ public:
     // voice, rather than having to trigger a new voice to hear the changes.
     // Parameters will update values once per audio callback because they
     // are outside the sample processing loop.
-    mOsc.freq(getInternalParameterValue("frequency"));
+
+    // vibMult = 1 + (mvib() * pow(12throot of2, vib depth))
+
+    mVib.freq(getInternalParameterValue("vibFreq")); // between -1 and 1
+    float freq = getInternalParameterValue("frequency");
+    // 12th root of 2
+    float vibDepth = getInternalParameterValue("vibDepth");
+
+    float scaledVibDepth = pow(1.0594630943592953, vibDepth);
+    float vibMult = 1 + (mVib() * scaledVibDepth);
+
+    // mOsc.freq(getInternalParameterValue("frequency")); // freq times vibMult
+    mOsc.freq(freq * vibMult);
     mAmpEnv.lengths()[0] = getInternalParameterValue("attackTime");
     mAmpEnv.lengths()[2] = getInternalParameterValue("releaseTime");
     mPan.pos(getInternalParameterValue("pan"));
